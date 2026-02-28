@@ -1,0 +1,699 @@
+:root {
+    --bg-main: #000000;
+    --text-main: #a1a1aa;
+    --text-white: #ffffff;
+    --border-color: #1a1a1a;
+    --sidebar-bg: #030303;
+    --canvas-area-bg: #050505;
+    --canvas-border: #222222;
+    --canvas-shadow: rgba(0,0,0,0.8);
+    --floating-shadow: rgba(0,0,0,0.6);
+}
+
+body.light-mode {
+    --bg-main: #ffffff;
+    --text-main: #555555;
+    --text-white: #000000;
+    --border-color: #e5e5e5;
+    --sidebar-bg: #f9f9f9;
+    --canvas-area-bg: #f0f0f0;
+    --canvas-border: #cccccc;
+    --canvas-shadow: rgba(0,0,0,0.08);
+    --floating-shadow: rgba(0,0,0,0.06);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+.layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.main-content {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Typography Helpers */
+.white { color: var(--text-white); }
+.icon { font-size: 1.1em; }
+
+/* Header */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-main);
+}
+
+.left-info { text-align: left; font-weight: bold; letter-spacing: 2px; }
+
+#my-name { font-weight: bold; color: var(--text-white); }
+
+/* Canvas Area */
+.canvas-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    min-height: 0;
+    background: var(--canvas-area-bg);
+    overflow: hidden;
+}
+
+.canvas-wrapper {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 0 20px var(--canvas-shadow);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-main);
+    border: 1px solid var(--canvas-border);
+    cursor: crosshair;
+}
+
+/* Bubbles Layer */
+#bubbles-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+}
+
+.chat-bubble {
+    position: absolute;
+    background: var(--sidebar-bg);
+    color: var(--text-main);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px) translateX(-50%);
+    /* Add left/top to transition so movement interpolates smoothly between grid blocks */
+    transition: opacity 0.2s ease, transform 0.2s ease, left 0.15s linear, top 0.15s linear, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--floating-shadow);
+    z-index: 1000;
+}
+
+.chat-bubble.visible {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+}
+
+/* Status Bar (bottom tools) */
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px 30px;
+    padding: 15px 20px;
+    color: #666;
+    font-size: 12px;
+    background: var(--sidebar-bg);
+    border-top: 1px solid var(--border-color);
+    z-index: 10;
+}
+
+.status-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-group label {
+    color: var(--text-main);
+}
+
+/* Controls Styling */
+
+
+
+
+
+
+
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--text-white);
+    cursor: pointer;
+}
+
+
+
+button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #888;
+    font-family: inherit;
+    font-size: 10px;
+    padding: 0 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+button:hover {
+    color: var(--text-white);
+    border-color: #666;
+}
+
+/* Force mobile styles regardless to ensure fix */
+@media screen and (max-width: 768px) {
+    #current-char, 
+}
+
+/* Topbar right alignment adjustments */
+.right-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.top-users {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        padding: 10px 15px;
+        height: auto;
+        min-height: 50px;
+        border-bottom: none;
+    }
+    
+    .user-text {
+        font-size: 10px;
+    }
+    
+    .canvas-area { padding: 10px; }
+    
+    .status-bar {
+        gap: 12px 20px;
+        padding: 12px;
+        justify-content: center;
+    }
+}
+
+/* Stacked Users System */
+.stacked-dots-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.stacked-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -6px; /* overlap negative margin */
+    position: relative;
+    transition: box-shadow 0.2s;
+}
+.stacked-dot:first-child {
+    margin-left: 0;
+}
+
+.extra-dot {
+    background: #222;
+    color: var(--text-white);
+    font-size: 8px;
+    font-weight: bold;
+}
+
+.mobile-hover-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px 16px;
+    min-width: max-content; /* This ensures it grows to fit the longest line */
+    box-shadow: 0 10px 30px var(--floating-shadow);
+    z-index: 10000;
+    
+    /* Hide by default, animate in on hover */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transform-origin: top right;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    /* Display list layout */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stacked-dots-wrapper:hover .mobile-hover-dropdown,
+.stacked-dots-wrapper:active .mobile-hover-dropdown,
+.stacked-dots-wrapper.active .mobile-hover-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dropdown-row {
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.user-color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.activity-status {
+    margin-left: 5px;
+    font-style: italic;
+    color: #888;
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+/* Glowing Animation for Drawing Users */
+.stacked-dot::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    box-shadow: 0 0 12px 4px var(--user-color, #fff);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.stacked-dot.is-drawing::after {
+    opacity: 1;
+}
+
+.desktop-only {
+    display: inline-block;
+    color: #888;
+    font-size: 10px;
+    font-weight: normal;
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+body, .topbar, .status-bar, .canvas-area, canvas, .mobile-hover-dropdown {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    will-change: background-color, border-color, color;
+}
+
+/* GPU Accelerated View Transition API for perfectly smooth theme toggling */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root) {
+    animation-name: fade-out;
+}
+
+::view-transition-new(root) {
+    animation-name: fade-in;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+
+
+.status-bar {
+    border-top: none !important;
+}
+
+.canvas-wrapper {
+    transition: transform 0.1s ease-out;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.canvas-wrapper.is-panning {
+    transition: none; /* Disable transition during drag for instant responsiveness */
+    cursor: grabbing !important;
+}
+
+.canvas-wrapper.is-panning canvas {
+    cursor: grabbing !important;
+}
+
+
+.app-logo {
+    color: var(--text-white);
+    transition: color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+.app-logo:hover {
+    transform: scale(1.1);
+}
+
+
+/* Floating Toolbar (Top) */
+.floating-toolbar {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.tool-grid {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px var(--floating-shadow);
+}
+
+.tool-item {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    color: var(--text-white);
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.tool-item:hover, .tool-item:focus {
+    border-color: #888;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--floating-shadow);
+}
+
+.tool-item:hover, .tool-item:focus {
+    border-color: #666;
+}
+
+.char-input {
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    width: 26px;
+    height: 26px;
+}
+
+.color-item {
+    overflow: hidden;
+    padding: 0;
+}
+
+.color-item 
+
+.size-btn {
+    font-weight: bold;
+    font-size: 10px;
+    color: var(--text-white);
+}
+
+/* Floating Zoom Bar (Bottom) */
+.floating-zoom {
+    position: absolute;
+    bottom: 20px; /* Above status-bar */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 6px 12px;
+    z-index: 100;
+    box-shadow: 0 8px 24px var(--floating-shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+/* Fix color picker appearance */
+.color-item {
+    position: relative;
+}
+.color-item input[type="color"] {
+    position: absolute;
+    top: -4px; left: -4px;
+    width: calc(100% + 8px); height: calc(100% + 8px);
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+    background: transparent;
+}
+.color-item input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.color-item input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 0;
+}
+
+
+@media (max-width: 768px) {
+    .floating-toolbar {
+        top: 65px; /* Sit cleanly beneath mobile topbar */
+    }
+    .floating-zoom {
+        bottom: 20px; /* status bar is smaller now without the tools */
+    }
+    .tool-grid {
+        gap: 10px;
+        padding: 6px 12px;
+    }
+    .tool-item {
+        width: 28px;
+        height: 28px; /* larger tap targets on mobile */
+    }
+    .floating-zoom {
+        padding: 6px 12px;
+    }
+}
+
+
+/* Floating Icon Buttons */
+.floating-icon-btn {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 8px 24px var(--floating-shadow);
+    transition: all 0.2s;
+    outline: none;
+    padding: 0;
+}
+
+.floating-icon-btn:hover, .floating-icon-btn:focus {
+    color: var(--text-white);
+    border-color: #888;
+    transform: translateY(-2px);
+}
+
+.floating-icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+body.light-mode .sun-icon { display: none; }
+body.light-mode .moon-icon { display: block; }
+body:not(.light-mode) .sun-icon { display: block; }
+body:not(.light-mode) .moon-icon { display: none; }
+
+
+/* Inline Username Edit Dropdown */
+.user-name-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.name-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
+    margin-top: 10px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px 16px;
+    box-shadow: 0 10px 30px var(--floating-shadow);
+    z-index: 10000;
+    
+    /* Hide by default */
+    opacity: 0;
+    visibility: hidden;
+    transform-origin: top center;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 150px;
+}
+
+.user-name-wrapper.active .name-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+#name-input {
+    width: 100%;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    color: var(--text-white);
+    padding: 8px;
+    font-family: inherit;
+    font-size: 10px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#name-input:focus {
+    border-color: #888;
+}
+
+.name-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.name-actions button {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 10px;
+}
+
+/* Modal legacy styles were removed */
+
+
+.zoom-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-main);
+    color: var(--text-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s;
+}
+
+.zoom-btn:hover {
+    border-color: #888;
+    background: var(--sidebar-bg);
+}

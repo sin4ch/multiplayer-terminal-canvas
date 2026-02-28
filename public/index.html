@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Minimal ASCII Canvas</title>
+    <!-- Geist Mono from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="main-content">
+            <header class="topbar">
+                <div class="left-info">
+                    <svg class="app-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h2v2H7V7zm4 0h2v2h-2V7zm4 0h2v2h-2V7zm-8 4h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2zm-8 4h2v2H7v-2zm4 0h2v2h-2v-2zm4 0h2v2h-2v-2z" />
+                    </svg>
+                </div>
+                <div class="right-info">
+                    
+                    <div class="user-name-wrapper" id="name-edit-wrapper">
+                        <span class="user-text">YOU: <span id="my-name" title="Click to edit name" style="cursor: pointer; border-bottom: 1px dashed var(--text-main);">...</span></span>
+                        <div class="name-dropdown" id="name-dropdown">
+                            <input type="text" id="name-input" maxlength="16" autocomplete="off" spellcheck="false" placeholder="New username">
+                            <div class="name-actions">
+                                <button id="cancel-name-btn">X</button>
+                                <button id="save-name-btn">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="top-users" id="top-users"></div>
+                    <span class="desktop-only"><span id="user-count">0</span> players online</span>
+                </div>
+            </header>
+
+            
+            <div class="floating-toolbar">
+                <button id="clear-btn" class="floating-icon-btn" title="Clear Canvas">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+                <button id="export-btn" class="floating-icon-btn" title="Export SVG">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </button>
+                <div class="tool-grid">
+                    <input type="text" id="current-char" class="tool-item char-input" value="#" maxlength="1" title="Tap to change" autocomplete="off" spellcheck="false">
+                    <div class="tool-item color-item" title="Choose color">
+                        <input type="color" id="color-picker" value="#ffffff">
+                    </div>
+                    <button id="size-btn" class="tool-item size-btn" title="Change size">1x</button>
+                </div>
+                <button id="theme-btn" class="floating-icon-btn" title="Toggle Theme">
+                    <svg class="sun-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg class="moon-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+
+            <div class="canvas-area" id="canvas-area">
+                <div class="canvas-wrapper" id="canvas-wrapper">
+                    <canvas id="canvas"></canvas>
+                    <div id="bubbles-layer"></div>
+                </div>
+            </div>
+
+            
+            
+            
+            <div class="zoom-bar floating-zoom">
+                <button id="zoom-out-btn" class="zoom-btn" title="Zoom Out">-</button>
+                <input type="range" id="zoom-slider" min="0.2" max="3" value="1" step="0.1">
+                <button id="zoom-in-btn" class="zoom-btn" title="Zoom In">+</button>
+                <span id="zoom-display">1.0x</span>
+                <button id="reset-view-btn">[RESET]</button>
+            </div>
+
+            
+        </div>
+    </div>
+    
+
+    
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

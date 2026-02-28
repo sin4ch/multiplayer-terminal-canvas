@@ -1,0 +1,15 @@
+{
+  "name": "multiplayer-terminal-canvas",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "acorn": "^8.16.0"
+  }
+}
