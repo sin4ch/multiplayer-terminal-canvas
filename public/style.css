@@ -710,8 +710,9 @@ body:not(.light-mode) .moon-icon { display: none; }
         width: max-content;
         max-width: 95%;
     }
+    
     .shape-grid {
-        order: 10;
+        order: 10 !important;
         width: auto;
         justify-content: center;
         margin-top: 5px;
