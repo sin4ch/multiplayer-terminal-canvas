@@ -697,3 +697,23 @@ body:not(.light-mode) .moon-icon { display: none; }
     border-color: #888;
     background: var(--sidebar-bg);
 }
+
+.tool-item.active {
+    background: var(--text-main);
+    color: var(--bg-main);
+}
+
+/* Shape pill responsive adjustments */
+@media (max-width: 900px) {
+    .floating-toolbar {
+        flex-wrap: wrap;
+        width: max-content;
+        max-width: 95%;
+    }
+    .shape-grid {
+        order: 10;
+        width: auto;
+        justify-content: center;
+        margin-top: 5px;
+    }
+}

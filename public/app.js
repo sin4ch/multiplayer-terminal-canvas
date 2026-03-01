@@ -452,16 +452,50 @@ function handlePointerEvent(e) {
     row = Math.floor(row / currentSize) * currentSize;
     
     if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-        const key = `${col},${row}`;
-        const existing = localGrid.get(key);
-        
-        if (!existing || existing.char !== currentChar || existing.color !== currentColor || existing.size !== currentSize) {
-            drawCell(col, row, currentChar, currentColor, currentSize);
-            drawQueue.push({ col, row, char: currentChar, color: currentColor, size: currentSize });
-            if (!drawQueueTimer) {
-                drawQueueTimer = setTimeout(flushDrawQueue, 50); // Send updates every 50ms
+        if (typeof currentShape !== 'undefined' && currentShape === 'text' && (e.type === 'mousedown' || e.type === 'touchstart')) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const absoluteX = (clientX - rect.left) * scaleX;
+            const absoluteY = (clientY - rect.top) * scaleY;
+            const posX = (col * BASE_W / INTERNAL_W) * 100;
+            const posY = (row * BASE_H / INTERNAL_H) * 100;
+            createTextBox(col, row, posX, posY);
+            if (e.cancelable) e.preventDefault();
+            isDrawing = false;
+            return;
+        } else if (typeof currentShape !== 'undefined' && currentShape !== 'point') {
+            if (e.type === 'mousedown' || e.type === 'touchstart') {
+                if (!shapeStartPoint) shapeStartPoint = { col, row };
+            } else if (shapeStartPoint) {
+                applyTheme(); 
+                let points = [];
+                if (currentShape === 'line') points = getLinePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+                else if (currentShape === 'circle') {
+                    const r = Math.round(Math.sqrt(Math.pow(col - shapeStartPoint.col, 2) + Math.pow(row - shapeStartPoint.row, 2)));
+                    points = getCirclePoints(shapeStartPoint.col, shapeStartPoint.row, r);
+                }
+                else if (currentShape === 'square') points = getSquarePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+                else if (currentShape === 'triangle') points = getTrianglePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+                
+                points.forEach(p => {
+                    if (p.col >= 0 && p.col < COLS && p.row >= 0 && p.row < ROWS) {
+                        drawPreviewCell(p.col, p.row, currentChar, currentColor, currentSize);
+                    }
+                });
             }
-            if (me) triggerDrawAnimation(me.id);
+        } else {
+            const key = `${col},${row}`;
+            const existing = localGrid.get(key);
+            
+            if (!existing || existing.char !== currentChar || existing.color !== currentColor || existing.size !== currentSize) {
+                drawCell(col, row, currentChar, currentColor, currentSize);
+                drawQueue.push({ col, row, char: currentChar, color: currentColor, size: currentSize });
+                if (!drawQueueTimer) {
+                    drawQueueTimer = setTimeout(flushDrawQueue, 50);
+                }
+                if (me) triggerDrawAnimation(me.id);
+            }
         }
     }
 }
@@ -551,9 +585,42 @@ window.addEventListener('mouseup', (e) => {
         isPanning = false;
         canvasWrapper.classList.remove('is-panning');
         lastPanPoint = null;
+        shapeStartPoint = null;
+        applyTheme();
     }
     if (e.button === 0) {
         isDrawing = false;
+        if (typeof currentShape !== 'undefined' && currentShape !== 'point' && shapeStartPoint) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            let col = Math.floor(Math.floor(x / BASE_W) / currentSize) * currentSize;
+            let row = Math.floor(Math.floor(y / BASE_H) / currentSize) * currentSize;
+            
+            let points = [];
+            if (currentShape === 'line') points = getLinePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+            else if (currentShape === 'circle') {
+                const r = Math.round(Math.sqrt(Math.pow(col - shapeStartPoint.col, 2) + Math.pow(row - shapeStartPoint.row, 2)));
+                points = getCirclePoints(shapeStartPoint.col, shapeStartPoint.row, r);
+            }
+            else if (currentShape === 'square') points = getSquarePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+            else if (currentShape === 'triangle') points = getTrianglePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+            
+            points.forEach(p => {
+                if (p.col >= 0 && p.col < COLS && p.row >= 0 && p.row < ROWS) {
+                    drawCell(p.col, p.row, currentChar, currentColor, currentSize);
+                    drawQueue.push({ col: p.col, row: p.row, char: currentChar, color: currentColor, size: currentSize });
+                }
+            });
+            
+            if (drawQueue.length > 0) flushDrawQueue();
+            if (me) triggerDrawAnimation(me.id);
+            
+            shapeStartPoint = null;
+            applyTheme(); 
+        }
     }
 });
 
@@ -600,9 +667,43 @@ canvasWrapper.addEventListener('touchend', (e) => {
         isPanning = false;
         canvasWrapper.classList.remove('is-panning');
         lastPanPoint = null;
+        shapeStartPoint = null;
+        applyTheme();
     }
     if (e.touches.length === 0) {
         isDrawing = false;
+        if (typeof currentShape !== 'undefined' && currentShape !== 'point' && shapeStartPoint && e.changedTouches.length > 0) {
+            const touch = e.changedTouches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+            let col = Math.floor(Math.floor(x / BASE_W) / currentSize) * currentSize;
+            let row = Math.floor(Math.floor(y / BASE_H) / currentSize) * currentSize;
+            
+            let points = [];
+            if (currentShape === 'line') points = getLinePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+            else if (currentShape === 'circle') {
+                const r = Math.round(Math.sqrt(Math.pow(col - shapeStartPoint.col, 2) + Math.pow(row - shapeStartPoint.row, 2)));
+                points = getCirclePoints(shapeStartPoint.col, shapeStartPoint.row, r);
+            }
+            else if (currentShape === 'square') points = getSquarePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+            else if (currentShape === 'triangle') points = getTrianglePoints(shapeStartPoint.col, shapeStartPoint.row, col, row);
+            
+            points.forEach(p => {
+                if (p.col >= 0 && p.col < COLS && p.row >= 0 && p.row < ROWS) {
+                    drawCell(p.col, p.row, currentChar, currentColor, currentSize);
+                    drawQueue.push({ col: p.col, row: p.row, char: currentChar, color: currentColor, size: currentSize });
+                }
+            });
+            
+            if (drawQueue.length > 0) flushDrawQueue();
+            if (me) triggerDrawAnimation(me.id);
+            
+            shapeStartPoint = null;
+            applyTheme(); 
+        }
     }
 });
 
@@ -610,6 +711,8 @@ canvasWrapper.addEventListener('touchcancel', () => {
     isDrawing = false;
     isPanning = false;
     canvasWrapper.classList.remove('is-panning');
+    shapeStartPoint = null;
+    applyTheme();
 });
 
 // Scroll Wheel Zoom
@@ -837,3 +940,232 @@ exportBtn.addEventListener('click', () => {
     URL.revokeObjectURL(url);
     exportBtn.blur();
 });
+
+// --- Shape Tools ---
+const shapeBtns = document.querySelectorAll('.shape-btn');
+let currentShape = 'point';
+let shapeStartPoint = null;
+
+shapeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        shapeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentShape = btn.dataset.shape;
+    });
+});
+
+function drawPreviewCell(col, row, char, color, size) {
+    if (!size) size = 1;
+    
+    const cellW = BASE_W * size;
+    const cellH = BASE_H * size;
+    const x = col * BASE_W;
+    const y = row * BASE_H;
+    
+    // Don't modify localGrid, just draw on top
+    const fontSize = BASE_H * size;
+    ctx.font = `${fontSize}px "Geist Mono", monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.5; // Make it semi-transparent for preview
+    
+    ctx.fillStyle = color;
+    ctx.fillText(char, x + cellW / 2, y + cellH / 2);
+    ctx.globalAlpha = 1.0;
+}
+
+// Function to generate coordinates for a line using Bresenham's algorithm
+function getLinePoints(x0, y0, x1, y1) {
+    const points = [];
+    const dx = Math.abs(x1 - x0);
+    const dy = Math.abs(y1 - y0);
+    const sx = (x0 < x1) ? 1 : -1;
+    const sy = (y0 < y1) ? 1 : -1;
+    let err = dx - dy;
+
+    let x = x0;
+    let y = y0;
+
+    while (true) {
+        points.push({col: x, row: y});
+        if (x === x1 && y === y1) break;
+        const e2 = 2 * err;
+        if (e2 > -dy) { err -= dy; x += sx; }
+        if (e2 < dx) { err += dx; y += sy; }
+    }
+    return points;
+}
+
+// Function to generate coordinates for a circle using Bresenham's algorithm
+function getCirclePoints(xc, yc, r) {
+    const points = [];
+    let x = 0;
+    let y = r;
+    let d = 3 - 2 * r;
+    
+    function addCirclePoints(xc, yc, x, y) {
+        points.push({col: xc+x, row: yc+y});
+        points.push({col: xc-x, row: yc+y});
+        points.push({col: xc+x, row: yc-y});
+        points.push({col: xc-x, row: yc-y});
+        points.push({col: xc+y, row: yc+x});
+        points.push({col: xc-y, row: yc+x});
+        points.push({col: xc+y, row: yc-x});
+        points.push({col: xc-y, row: yc-x});
+    }
+    
+    addCirclePoints(xc, yc, x, y);
+    while (y >= x) {
+        x++;
+        if (d > 0) {
+            y--;
+            d = d + 4 * (x - y) + 10;
+        } else {
+            d = d + 4 * x + 6;
+        }
+        addCirclePoints(xc, yc, x, y);
+    }
+    
+    // Remove duplicates
+    const uniquePoints = [];
+    const seen = new Set();
+    for (const p of points) {
+        const key = `${p.col},${p.row}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniquePoints.push(p);
+        }
+    }
+    return uniquePoints;
+}
+
+// Generate coordinates for a square/rectangle
+function getSquarePoints(x0, y0, x1, y1) {
+    const points = [];
+    const minX = Math.min(x0, x1);
+    const maxX = Math.max(x0, x1);
+    const minY = Math.min(y0, y1);
+    const maxY = Math.max(y0, y1);
+    
+    for (let x = minX; x <= maxX; x++) {
+        points.push({col: x, row: minY});
+        points.push({col: x, row: maxY});
+    }
+    for (let y = minY + 1; y <= maxY - 1; y++) {
+        points.push({col: minX, row: y});
+        points.push({col: maxX, row: y});
+    }
+    
+    const uniquePoints = [];
+    const seen = new Set();
+    for (const p of points) {
+        const key = `${p.col},${p.row}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniquePoints.push(p);
+        }
+    }
+    return uniquePoints;
+}
+
+// Generate coordinates for a triangle
+function getTrianglePoints(x0, y0, x1, y1) {
+    const points = [];
+    const width = Math.abs(x1 - x0) * 2;
+    const leftX = x0 - (x1 - x0);
+    
+    points.push(...getLinePoints(x0, y0, leftX, y1));
+    points.push(...getLinePoints(x0, y0, x1, y1));
+    points.push(...getLinePoints(leftX, y1, x1, y1));
+    
+    const uniquePoints = [];
+    const seen = new Set();
+    for (const p of points) {
+        const key = `${p.col},${p.row}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniquePoints.push(p);
+        }
+    }
+    return uniquePoints;
+}
+
+// Add text box support
+const canvasArea = document.getElementById('canvas-area');
+let activeTextBox = null;
+
+function createTextBox(col, row, x, y) {
+    if (activeTextBox) {
+        finishTextBox(false);
+    }
+    
+    activeTextBox = document.createElement('input');
+    activeTextBox.type = 'text';
+    activeTextBox.style.position = 'absolute';
+    activeTextBox.style.left = `${x}%`;
+    activeTextBox.style.top = `${y}%`;
+    // No transform needed, top/left corresponds to cell origin
+    activeTextBox.style.width = '100px';
+    activeTextBox.style.background = isLightMode ? '#fff' : '#000';
+    activeTextBox.style.color = currentColor;
+    activeTextBox.style.border = '1px dashed #888';
+    activeTextBox.style.fontFamily = '"Geist Mono", monospace';
+    // The font size also needs to scale correctly. 
+    // We can use container query or just calc based on wrapper size, or keep it simple.
+    // Actually, setting font-size via inline style in 'px' breaks when zoomed/scaled via CSS.
+    // Let's calculate the real CSS pixel height for the font.
+    const rect = canvasWrapper.getBoundingClientRect();
+    const scaleY = rect.height / INTERNAL_H;
+    activeTextBox.style.fontSize = `${BASE_H * currentSize * scaleY}px`;
+    activeTextBox.style.outline = 'none';
+    activeTextBox.style.padding = '0';
+    activeTextBox.style.margin = '0';
+    activeTextBox.style.zIndex = '1000';
+    activeTextBox.dataset.col = col;
+    activeTextBox.dataset.row = row;
+    
+    canvasWrapper.appendChild(activeTextBox);
+    setTimeout(() => { if (activeTextBox) activeTextBox.focus(); }, 10);
+    
+    activeTextBox.addEventListener('blur', finishTextBox);
+    activeTextBox.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') finishTextBox();
+    });
+}
+
+function finishTextBox(switchTool = true) {
+    // Handle case where it receives an event object
+    if (typeof switchTool !== 'boolean') switchTool = true;
+    if (!activeTextBox) return;
+    
+    const text = activeTextBox.value;
+    const startCol = parseInt(activeTextBox.dataset.col);
+    const startRow = parseInt(activeTextBox.dataset.row);
+    
+    if (text) {
+        for (let i = 0; i < text.length; i++) {
+            const col = startCol + (i * currentSize);
+            if (col < COLS) {
+                drawCell(col, startRow, text[i], currentColor, currentSize);
+                drawQueue.push({ col, row: startRow, char: text[i], color: currentColor, size: currentSize });
+            }
+        }
+        
+        if (drawQueue.length > 0) {
+            flushDrawQueue();
+            if (me) triggerDrawAnimation(me.id);
+        }
+    }
+    
+    if (activeTextBox.parentNode) {
+        activeTextBox.parentNode.removeChild(activeTextBox);
+    }
+    activeTextBox = null;
+    if (switchTool) {
+        currentShape = 'point';
+        shapeBtns.forEach(b => b.classList.remove('active'));
+        const pointBtn = document.querySelector('.shape-btn[data-shape="point"]');
+        if (pointBtn) pointBtn.classList.add('active');
+    }
+}
