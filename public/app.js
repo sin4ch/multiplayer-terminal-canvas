@@ -1162,10 +1162,5 @@ function finishTextBox(switchTool = true) {
         activeTextBox.parentNode.removeChild(activeTextBox);
     }
     activeTextBox = null;
-    if (switchTool) {
-        currentShape = 'point';
-        shapeBtns.forEach(b => b.classList.remove('active'));
-        const pointBtn = document.querySelector('.shape-btn[data-shape="point"]');
-        if (pointBtn) pointBtn.classList.add('active');
-    }
+    // Removed switchTool logic so text tool stays active
 }
